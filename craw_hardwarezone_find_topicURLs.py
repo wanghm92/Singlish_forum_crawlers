@@ -48,7 +48,7 @@ output_path = args.output_path
 def write_urls():
 
     L.info(' >>>>>>>>>>>>> Writing crawled URLs to file <<<<<<<<<<<<<<<')
-    with open(path.join(output_path, 'target_urls.txt'),'wa+') as furl:
+    with open(path.join(output_path, 'topic_urls.hdz.txt'),'w') as furl:
         for url in url_visited.iterkeys():
             furl.write(url)
             furl.write('\n')
@@ -102,12 +102,17 @@ def find_all_target_urls(start_site, fout_combo):
             # stat = []
             
             signal.alarm(2)  # SETTING ALARM #
-            links = header.findAll('a', href=True)
+            links = header.findAll('a', {'target' : None}, href=True)
             signal.alarm(0)  # RESETTING ALARM #
             
             for l in links:
-
-                topic_url = HWZ_URL_START + l['href']
+                href = l['href']
+                if not HWZ_URL_START in href:
+                    if not 'http://' in href:
+                        topic_url = HWZ_URL_START + l['href']
+                else:
+                    topic_url = href
+                                    
                 topic_name = l.text
                 L.info('Checking TOPIC_URL : ' + topic_url)
                 if not url_visited.has_key(topic_url):
@@ -134,7 +139,7 @@ if __name__ == "__main__":
 
         signal.signal(signal.SIGALRM, handler)
 
-        with open(path.join(output_path, start_site[NAME] + '.urlcombo'), 'w+') as fout_combo:
+        with open(path.join(output_path, start_site[NAME] + '.topic_urls.combo'), 'w+') as fout_combo:
             find_all_target_urls(start_site, fout_combo)
 
     except RuntimeError:
